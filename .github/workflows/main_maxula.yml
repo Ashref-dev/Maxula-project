@@ -37,13 +37,13 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o myapp
+        run: dotnet publish -r linux-x64 -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: .net-app
-          path: myapp
+          path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
     runs-on: ubuntu-latest
@@ -64,5 +64,5 @@ jobs:
         with:
           app-name: 'Maxula'
           slot-name: 'Production'
-          package: 'myapp'
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_79057288B106487BADBE5967E6BD7319 }}
