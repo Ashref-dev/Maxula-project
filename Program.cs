@@ -25,7 +25,7 @@ if (env.IsProduction())
         options.AddPolicy("AllowSpecificOrigin",
             corsPolicyBuilder =>
             {
-                corsPolicyBuilder.WithOrigins("https://maxulatest.azurewebsites.net/")
+                corsPolicyBuilder.WithOrigins("https://maxula.azurewebsites.net/")
                     .AllowAnyHeader()
                     .AllowAnyMethod();
             });
