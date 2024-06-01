@@ -1,0 +1,289 @@
+﻿@using Maxula_project.Models
+@using System.Drawing;
+@using QRCoder;
+@using System.Drawing.Imaging;
+@using BlazorDownloadFile
+@using Maxula_project.Services.ActivityService
+
+@layout Layout.AdminLayout
+@page "/admin/generate"
+@inject IJSRuntime JS;
+@inject IBlazorDownloadFileService BlazorDownloadFileService
+@inject IActivityService _activityService
+@inject IConsoleLoggerService Console
+@inject NavigationManager NavManager
+
+
+<PageTitle>Maxula - Generate QR</PageTitle>
+
+
+<div class="mt-6 px-8 max-w-6xl mx-auto">
+    <h2 class="text-lg mb-4 leading-6 font-medium text-gray-900">
+        Generate QR code <span class="text-md font-light italic">- to put on desk</span>
+    </h2>
+</div>
+
+<div class="px-4 sm:px-6 lg:px-8 lg:mx-auto lg:max-w-6xl ">
+    <div class="mt-4 flex flex-col">
+        <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+
+
+                    <EditForm class="flex flex-col max-w-xl m-auto gap-6 px-4 py-16" method="post"
+                              Model="QrCodeModel" OnValidSubmit="SubmitGenerate" FormName="generate" Enhance>
+
+                        <DataAnnotationsValidator />
+
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="w-12 h-12 mx-auto">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+                        </svg>
+
+                        <div class="grid gap-1">
+                            <h2 class="text-lg leading-6 font-medium text-gray-900">
+                                Please enter desk information
+                            </h2>
+                            <p>
+                                The information entered should be accurate to the desk where the QR code will be placed, please double check the information and use the QR codes for accurate check-in and check-out operations.
+                            </p>
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-900">Sector:</label>
+                            <InputText id="sector" @bind-Value="QrCodeModel.Sector"
+                                       class="block w-full rounded-md border-0 py-1.5 pl-7 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6" />
+                            <ValidationMessage For="() => QrCodeModel.Sector" class="text-red-600" />
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Desk ID:</label>
+                            <InputNumber id="DeskId" @bind-Value="QrCodeModel.DeskId"
+                                         class="block w-full rounded-md border-0 py-1.5 pl-7 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6" />
+                            <ValidationMessage For="() => QrCodeModel.DeskId" class="text-red-600" />
+                        </div>
+
+
+                        <div class="w-full flex items-center justify-between">
+                            <a href="@($"/admin")"
+                               class="inline-flex w-fit gap-2 items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                     stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                                </svg>
+                                Back to home
+                            </a>
+
+                            <button type="submit"
+                                    class="inline-flex justify-self-end gap-2 w-fit items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                Generate QR code
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                     stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 0 1 9 9v.375M10.125 2.25A3.375 3.375 0 0 1 13.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 0 1 3.375 3.375M9 15l2.25 2.25L15 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (IsVisible)
+{
+    <div class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <!-- This element is to trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="relative inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                <div>
+                    <div class="mx-auto flex items-center justify-center w-32 pointer-events-none">
+                        <iframe class="pointer-events-none" style="max-width: 100%; height: 11vh"
+                                src="https://embed.lottiefiles.com/animation/72785">
+                        </iframe>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-5">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Please confirm information entered for accuracy.</h3>
+                        <div class="mt-2">
+                            @if (QrCodeModel is not null)
+                            {
+                                <p class="text-sm text-gray-500 flex flex-col gap-2">
+                                    A code will be generated with the following:
+                                    <div class="flex flex-col gap-1">
+                                        <p><strong>Sector: </strong> @QrCodeModel.Sector</p>
+                                        <p><strong>Desk ID: </strong>@QrCodeModel.DeskId</p>
+                                    </div>
+                                </p>
+                            }
+                        </div>
+                    </div>
+                </div>
+                @* button goes here  *@
+                <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                    <button type="button"
+                            @onclick="SubmitConfirm"
+                            class="w-full inline-flex gap-2 justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:col-start-2 sm:text-sm">
+                        Generate
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+                        </svg>
+
+                    </button>
+                    <button type="button"
+                            @onclick='()=> IsVisible = false'
+                            class="mt-3 w-full inline-flex gap-2 justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                        </svg>
+
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@if (IsSuccess)
+{
+    <div class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <!-- This element is to trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="relative inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                <div>
+                    <div class="mx-auto flex items-center justify-center w-32 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="green" class="w-16 h-16">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-5">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Code generated successfully !</h3>
+
+                        @* QR code image  *@
+                        <img alt="QR Code" src="@QRByte" width="360" class="mx-auto" />
+
+                    </div>
+                </div>
+                @* button goes here  *@
+                <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                    <button type="button"
+                            @onclick='()=> {DownloadQRCodeTask();}'
+                            class="w-full inline-flex gap-2 justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:col-start-2 sm:text-sm">
+                        Download
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+
+                    </button>
+                    <button type="button"
+                            @onclick='()=> {IsSuccess = false; NavManager.NavigateTo("/admin/generate", forceLoad: true);}'
+                            class="mt-3 w-full inline-flex gap-2 justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                        </svg>
+
+                        Go back
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@code {
+    [SupplyParameterFromForm]
+    public QrCodeModel? QrCodeModel { get; set; } = new();
+
+    public void SubmitGenerate()
+    {
+        IsVisible = true;
+    }
+
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    [Parameter]
+    public bool IsSuccess { get; set; }
+    // Define method to close modal
+    private void CloseModal()
+    {
+        IsVisible = false;
+    }
+
+    private async Task SubmitConfirm()
+    {
+        IsVisible = false;
+
+        var response = await _activityService.AddQRCode(QrCodeModel);
+
+        if (!response.Success)
+        {
+            //handle error TODO
+            return;
+        }
+
+        ShowSuccess();
+
+        await JS.InvokeVoidAsync("frame");
+
+    }
+
+    private void ShowSuccess()
+    {
+        var targetString = "MaxulaAdmin" + "$" + QrCodeModel.Sector + "$" + QrCodeModel.DeskId.ToString();
+        GenerateQRCode(targetString);
+        IsSuccess = true;
+    }
+
+    public string QRByte = "";
+
+    public void GenerateQRCode(string QRCodeText)
+    {
+        if (!string.IsNullOrEmpty(QRCodeText))
+        {
+            using MemoryStream ms = new();
+            QRCodeGenerator qrCodeGenerate = new();
+            QRCodeData qrCodeData = qrCodeGenerate.CreateQrCode(QRCodeText, QRCodeGenerator.ECCLevel.Q);
+            QRCode qrCode = new(qrCodeData);
+            using Bitmap qrBitMap = qrCode.GetGraphic(20, Color.Black, Color.White, (Bitmap)Bitmap.FromFile("wwwroot/assets/images/qr_badge.png"));
+            qrBitMap.Save(ms, ImageFormat.Png);
+            string base64 = Convert.ToBase64String(ms.ToArray());
+            QRByte = string.Format("data:image/png;base64,{0}", base64);
+        }
+    }
+
+    public async void DownloadQRCodeTask()
+    {
+        await DownloadQRCode("MaxulaAdmin" + "$" + QrCodeModel.Sector + "$" + QrCodeModel.DeskId.ToString());
+    }
+
+    public async Task DownloadQRCode(string qrCodeText)
+    {
+        var qrCodeGenerate = new QRCodeGenerator();
+        var qrCodeData = qrCodeGenerate.CreateQrCode(qrCodeText, QRCodeGenerator.ECCLevel.Q);
+        var qrCode = new QRCode(qrCodeData);
+        using var bitmap = qrCode.GetGraphic(20, Color.Black, Color.White, (Bitmap)Bitmap.FromFile("wwwroot/assets/images/qr_badge.png"));
+        using var stream = new MemoryStream();
+        bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+        var bytes = stream.ToArray();
+        await BlazorDownloadFileService.DownloadFile("QRCode.png", bytes, "image/png");
+    }
+
+
+}

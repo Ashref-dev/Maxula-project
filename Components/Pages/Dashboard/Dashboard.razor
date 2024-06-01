@@ -1,0 +1,165 @@
+﻿@using Maxula_project.Services.ActivityService
+@using Maxula_project.Services.UserService
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+
+@inject IActivityService _activityService
+@inject NavigationManager NavManager
+
+@* // Dashboard with sidebar layout usage  *@
+@layout Layout.AdminLayout
+@page "/admin"
+
+<PageTitle>Maxula - Dashboard</PageTitle>
+
+<div class="mt-8">
+
+    @* Stats component below  *@
+    <OverviewCards />
+
+    <!-- Activity table -->
+    <h2 class="max-w-6xl mx-auto mt-8 px-4 text-lg leading-6 font-medium text-gray-900 sm:px-6 lg:px-8">
+        Recent
+        activity <span class="text-md font-light italic">- showing 10 entries</span>
+    </h2>
+
+
+    <div class="px-4 sm:px-6 lg:px-8 lg:mx-auto lg:max-w-6xl ">
+
+        <div class="mt-8 flex flex-col">
+            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-300">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                        Name
+                                    </th>
+                                    <th scope="col"
+                                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Desk ID
+                                    </th>
+
+                                    <th scope="col"
+                                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Date
+                                    </th>
+                                    <th scope="col"
+                                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Check in
+                                    </th>
+                                    <th scope="col"
+                                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Check out
+                                    </th>
+                                    <th scope="col"
+                                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Total Hours
+                                    </th>
+                                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                        <span class="sr-only">Edit</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 bg-white">
+
+                                @if (activities != null)
+                                {
+                                    @foreach (var activity in activities)
+                                    {
+                                        <tr>
+                                            <td class="whitespace-nowrap pl-4 text-sm sm:pl-6">
+                                                <div class="flex items-center">
+                                                    <div class="h-10 w-10 flex-shrink-0">
+                                                        <img class="h-10 w-10 rounded-full"
+                                                             src="@activity.User.Picture"
+                                                             alt="user icon">
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="font-medium text-gray-900">@activity.User.FirstName</div>
+                                                        <div class="text-gray-500">@activity.User.Email</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                <div class="text-gray-900 font-semibold">@activity.Sector</div>
+                                                <div class="text-gray-500">Desk @activity.DeskId</div>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                <span class="inline-flex rounded-full bg-green-100 px-2 text-l font-semibold leading-5 text-green-800">
+                                                    @activity.Date
+                                                </span>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                @activity.CheckIn
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                @(activity.CheckOut != null ? activity.CheckOut : "Not yet")
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                @if (activity.CheckOut != null)
+                                                {
+                                                    DateTime startTime = DateTime.Parse(activity.CheckIn.ToString());
+                                                    DateTime endTime = DateTime.Parse(activity.CheckOut.ToString());
+
+                                                    TimeSpan elapsedTime = endTime.Subtract(startTime);
+
+                                                    if (endTime.Date > startTime.Date)
+                                                    {
+                                                        elapsedTime += new TimeSpan(24, 0, 0);
+                                                    }
+
+                                                    double totalHours = elapsedTime.TotalHours - 1;
+
+                                                    <p>@totalHours.ToString("0.00") hours</p>
+                                                }
+                                                else
+                                                {
+                                                    <p>N/A</p>
+                                                }
+                                            </td>
+                                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                                <a href="" class="text-indigo-600 hover:text-indigo-900">
+                                                    Entry @activity.ActivityId »
+                                                    <span class="sr-only">, @activity.User.FirstName</span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <p class="text-3xl">Loading...</p>
+                                }
+
+
+                                <!-- More people... -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @* end of activity table *@
+
+</div>
+
+@code {
+    List<GetActivityResponseDto> activities = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        // get data from db for recent activities section
+        var resultActivities = await _activityService.GetAllActivities("", new DateOnly(2020, 1, 1), DateOnly.FromDateTime(DateTime.Now), 1, 10);
+
+        if (resultActivities != null)
+        {
+            activities = resultActivities.Data == null ? new List<GetActivityResponseDto>() : resultActivities.Data;
+        }
+
+    }
+
+}

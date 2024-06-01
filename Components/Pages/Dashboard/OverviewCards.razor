@@ -1,0 +1,473 @@
+﻿@using Maxula_project.Services.ActivityService
+
+@inject IConsoleLoggerService Console
+@inject IActivityService _activityService
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-lg leading-6 font-medium text-gray-900">Overview</h2>
+    <div class="mt-2 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+        <!-- Card 1 -->
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+
+                        <!-- Heroicon -->
+                        <svg class="w-6 h-6 text-gray-400"
+                             xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+                        </svg>
+
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Average Check-in Time Today</dt>
+                            <dd>
+                                <div class="flex items-center gap-2 mt-2">
+
+                                    @if (ChangeMetric != null)
+                                    {
+                                        <p class="text-lg font-medium text-gray-900">@ChangeMetric</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-lg font-medium text-gray-900">Loading...</p>
+                                    }
+
+                                    @if (ChangeTrend == "up")
+                                    {
+                                        <span class="inline-flex h-fit items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 fill="none"
+                                                 viewBox="0 0 24 24"
+                                                 stroke-width="1.5"
+                                                 stroke="currentColor"
+                                                 class="w-5 h-5">
+                                                <path stroke-linecap="round"
+                                                      stroke-linejoin="round"
+                                                      d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+                                            </svg>
+                                            &nbsp;@(ChangePercentage != null ? ChangePercentage : "...")%
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex h-fit items-center px-3 py-0.5 rounded-full text-sm font-medium
+                                                            bg-red-100 text-red-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 fill="none"
+                                                 viewBox="0 0 24 24"
+                                                 stroke-width="1.5"
+                                                 stroke="currentColor"
+                                                 class="w-5 h-5">
+                                                <path stroke-linecap="round"
+                                                      stroke-linejoin="round"
+                                                      d="M2.25 6 9 12.75l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181" />
+                                            </svg>
+                                            &nbsp;@(ChangePercentage != null ? ChangePercentage : "...")%
+                                        </span>
+                                    }
+
+
+
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3 self-end">
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-primary-700 hover:text-primary-900">
+                        View all
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2 -->
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <!-- Heroicon name: outline/scale -->
+                        <svg class="h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor"
+                             aria-hidden="true"
+                             stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                        </svg>
+
+
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Average Hours Worked Today </dt>
+                            <dd>
+                                <div class="flex items-center gap-2 mt-2">
+                                    @if (ChangeMetric2 != null)
+                                    {
+                                        <p class="text-lg font-medium text-gray-900">@ChangeMetric2 Hours</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-lg font-medium text-gray-900">Loading...</p>
+                                    }
+
+                                    @if (ChangeTrend2 == "up")
+                                    {
+                                        <span class="inline-flex h-fit items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 fill="none"
+                                                 viewBox="0 0 24 24"
+                                                 stroke-width="1.5"
+                                                 stroke="currentColor"
+                                                 class="w-5 h-5">
+                                                <path stroke-linecap="round"
+                                                      stroke-linejoin="round"
+                                                      d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+                                            </svg>
+                                            &nbsp;@(ChangePercentage2 != null ? ChangePercentage2 : "...")%
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex h-fit items-center px-3 py-0.5 rounded-full text-sm font-medium
+                                                            bg-red-100 text-red-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 fill="none"
+                                                 viewBox="0 0 24 24"
+                                                 stroke-width="1.5"
+                                                 stroke="currentColor"
+                                                 class="w-5 h-5">
+                                                <path stroke-linecap="round"
+                                                      stroke-linejoin="round"
+                                                      d="M2.25 6 9 12.75l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181" />
+                                            </svg>
+                                            &nbsp;@(ChangePercentage2 != null ? ChangePercentage2 : "...")%
+                                        </span>
+                                    }
+
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-primary-700 hover:text-primary-900">
+                        View all
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3 -->
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <!-- Heroicon name: outline/scale -->
+                        <svg class="h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
+                        </svg>
+
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Hours Worked This Week</dt>
+                            <dd>
+                                <div class="flex items-center gap-2 mt-2">
+                                    @if (ChangeMetric3 != null)
+                                    {
+                                        <p class="text-lg font-medium text-gray-900">@ChangeMetric3 Hours</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-lg font-medium text-gray-900">Loading...</p>
+                                    }
+
+                                    @if (ChangeTrend3 == "up")
+                                    {
+                                        <span class="inline-flex h-fit items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 fill="none"
+                                                 viewBox="0 0 24 24"
+                                                 stroke-width="1.5"
+                                                 stroke="currentColor"
+                                                 class="w-5 h-5">
+                                                <path stroke-linecap="round"
+                                                      stroke-linejoin="round"
+                                                      d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+                                            </svg>
+                                            &nbsp;@(ChangePercentage3 != null ? ChangePercentage3 : "...")%
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex h-fit items-center px-3 py-0.5 rounded-full text-sm font-medium
+                                                            bg-red-100 text-red-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 fill="none"
+                                                 viewBox="0 0 24 24"
+                                                 stroke-width="1.5"
+                                                 stroke="currentColor"
+                                                 class="w-5 h-5">
+                                                <path stroke-linecap="round"
+                                                      stroke-linejoin="round"
+                                                      d="M2.25 6 9 12.75l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181" />
+                                            </svg>
+                                            &nbsp;@(ChangePercentage3 != null ? ChangePercentage3 : "...")%
+                                        </span>
+                                    }
+
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-primary-700 hover:text-primary-900">
+                        View all
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- More items... -->
+    </div>
+</div>
+
+@code {
+    DateOnly TodayDate = DateOnly.FromDateTime(DateTime.Now);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CalculateCard1(TodayDate);
+
+        await CalculateCard2(TodayDate);
+
+        await CalculateCard3(TodayDate);
+    }
+
+
+    // Card 1
+    string ChangeMetric = null!;
+
+    string ChangePercentage = null!;
+    string ChangeTrend = null!;
+
+    // Card 2
+    string ChangeMetric2 = null!;
+
+    string ChangePercentage2 = null!;
+    string ChangeTrend2 = null!;
+
+    // Card 3
+    string ChangeMetric3 = null!;
+
+    string ChangePercentage3 = null!;
+    string ChangeTrend3 = null!;
+
+
+
+    private async Task CalculateCard1(DateOnly today)
+    {
+        // Calculating average checkin for today
+
+        var averageCheckInTime = await _activityService.GetAverageCheckInTimeByDay(today);
+
+
+
+        if (!averageCheckInTime.Success)
+        {
+            ChangeMetric = "Error";
+            ChangePercentage = "N/A";
+            return;
+        }
+
+        if (averageCheckInTime.Message == "There is no activity today yet.")
+        {
+            ChangeMetric = "No check-in yet.";
+            ChangePercentage = "N/A";
+            return;
+        }
+
+        ChangeMetric = averageCheckInTime.Data.ToString("HH:mm");
+
+        // Calculating average check in for Yesterday
+
+        var averageYesterday = await _activityService.GetAverageCheckInTimeByDay(today.AddDays(-1));
+
+        if (!averageYesterday.Success)
+        {
+            ChangePercentage = "N/A";
+            return;
+        }
+
+        TimeOnly oldTime = averageYesterday.Data;
+        TimeOnly newTime = averageCheckInTime.Data;
+
+        await Console.LogAsync("Times of checkin old vs new");
+        await Console.LogAsync(oldTime);
+        await Console.LogAsync(newTime);
+
+
+        double differenceInMinutes;
+
+        // Check if the time has improved or worsened
+        if (newTime < oldTime)
+        {
+            ChangeTrend = "up";
+            // Calculate the difference in minutes
+            differenceInMinutes = (oldTime - newTime).TotalMinutes;
+        }
+        else
+        {
+            ChangeTrend = "down";
+            // Calculate the difference in minutes
+            differenceInMinutes = (newTime - oldTime).TotalMinutes;
+        }
+
+
+
+        await Console.LogAsync(differenceInMinutes);
+        // Calculate the maximum possible difference in minutes (e.g., 24 hours)
+        // Normalize the difference to a percentage (Feature scaling ???? magic number here i come)
+
+        double maxDifferenceInMinutes = (3 * 60);
+
+
+        var percentage = (99 - 1) * ((differenceInMinutes - 1) / (maxDifferenceInMinutes - 1)) + 1;
+
+        await Console.LogAsync(percentage);
+
+        ChangePercentage = percentage.ToString("N1");
+    }
+
+    private async Task CalculateCard2(DateOnly today)
+    {
+        // Calculating average worked for today
+
+        var averageWorkTime = await _activityService.GetAverageWorkHoursByDay(today);
+
+        if (!averageWorkTime.Success)
+        {
+            ChangeMetric2 = "Error";
+            ChangePercentage2 = "N/A";
+            return;
+        }
+
+        if (averageWorkTime.Data == 0)
+        {
+            ChangeMetric2 = "No complete shift yet.";
+            ChangePercentage2 = "N/A";
+            return;
+        }
+
+        ChangeMetric2 = averageWorkTime.Data.ToString("N1");
+
+        // Calculating average check in for Yesterday
+
+        var averageYesterday = await _activityService.GetAverageWorkHoursByDay(today.AddDays(-1));
+
+        if (!averageYesterday.Success)
+        {
+            ChangePercentage2 = "N/A";
+            return;
+        }
+
+        double oldValue = averageYesterday.Data;
+        double newValue = averageWorkTime.Data;
+
+        // Check if the time has improved or worsened
+        if (newValue > oldValue)
+        {
+            ChangeTrend2 = "up";
+        }
+        else
+        {
+            ChangeTrend2 = "down";
+        }
+
+        // Calculate the difference
+        double differenceValue = oldValue - newValue;
+
+        // Calculate the percentage difference
+        double percentageDifference = Math.Round(Math.Abs(differenceValue / oldValue) * 100);
+
+        ChangePercentage2 = percentageDifference.ToString("N1");
+    }
+
+    private async Task CalculateCard3(DateOnly today)
+    {
+        // Calculating average worked for today
+
+        var totalWorkTimeWeek = await _activityService.GetTotalWorkHoursByWeek(today);
+
+        await Console.LogAsync("card3 thiswekk");
+        await Console.LogAsync(totalWorkTimeWeek);
+
+        if (!totalWorkTimeWeek.Success)
+        {
+            ChangeMetric3 = "Error";
+            ChangePercentage3 = "N/A";
+            return;
+        }
+
+        if (totalWorkTimeWeek.Data == 0)
+        {
+            ChangeMetric3 = "No complete shift yet.";
+            ChangePercentage3 = "N/A";
+            return;
+        }
+
+        ChangeMetric3 = totalWorkTimeWeek.Data.ToString("N1");
+
+        // Calculating total for last week
+
+        var totalLastWeek = await _activityService.GetTotalWorkHoursByWeek(today.AddDays(-7));
+
+        if (!totalLastWeek.Success || totalLastWeek.Data == 0)
+        {
+            ChangePercentage3 = "N/A";
+            return;
+        }
+
+        double oldValue = totalLastWeek.Data;
+        double newValue = totalWorkTimeWeek.Data;
+
+        // Check if the time has improved or worsened
+        if (newValue > oldValue)
+        {
+            ChangeTrend3 = "up";
+        }
+        else
+        {
+            ChangeTrend3 = "down";
+        }
+
+        // Calculate the difference
+        double differenceValue = oldValue - newValue;
+
+        // Calculate the percentage difference
+        double percentageDifference = Math.Round(Math.Abs(differenceValue / oldValue) * 100);
+
+        ChangePercentage3 = percentageDifference.ToString("N1");
+    }
+
+}

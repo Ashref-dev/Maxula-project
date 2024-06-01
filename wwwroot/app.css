@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+    scroll-behavior: smooth;
+}
+
+.dash-nav-link.active {
+    background: #2a3fa3;
+    color: white;
+}
+
+@media print {
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    .no-print,
+    .no-print * {
+        display: none !important;
+    }
+}
+
+@keyframes clipIn {
+    0% {
+        clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+    }
+
+    100% {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+}
+
+@keyframes clipOut {
+    0% {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    100% {
+        clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+    }
+}
+
+.dropdown {
+    animation: clipOut 0.3s ease-in-out forwards;
+    /* border: 2px solid rgba(0, 0, 0, 0.2); */
+}
+
+    .dropdown.show {
+        animation: clipIn 0.3s ease-in-out forwards;
+    }

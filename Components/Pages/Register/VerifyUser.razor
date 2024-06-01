@@ -1,0 +1,135 @@
+﻿@using Maxula_project.Services.UserService
+
+@page "/verify"
+@inject IUserService _userService
+@inject IJSRuntime JS
+@inject NavigationManager NavManager
+@inject IConsoleLoggerService Console
+
+<PageTitle>Maxula - Verify</PageTitle>
+
+<section class="bg-gray-50 dark:bg-gray-900">
+    <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+
+        <div class="w-full bg-white rounded-lg shadow dark:border mt-16 md:mt-32 xl:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+            <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+
+
+
+
+                @if (IsLoading)
+                {
+                    <div class="flex justify-center items-center h-64">
+                        <svg class="animate-spin w-fit h-8 w-8 text-red" xmlns="http://www.w3.org/2000/svg"
+                             fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="red" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="red"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                    </div>
+                }
+                else
+                {
+                    @if (Success)
+                    {
+                        <div class="relative inline-block align-bottom bg-white rounded-lg px-4 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full sm:p-6">
+                            <div>
+                                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                                    <!-- Heroicon name: outline/check -->
+                                    <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <div class="mt-3 text-center sm:mt-5">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Verification successful</h3>
+                                    <div class="mt-2">
+                                        <p class="text-sm text-gray-500">Your account has been successfully verified, you can now log in.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-5 sm:mt-6">
+                                <a href="/login" class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm">
+                                    Got to login
+                                </a>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden transform transition-all sm:my-4 sm:align-middle sm:max-w-sm sm:w-full sm:p-6">
+                            <div>
+                                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                                    <!-- Heroicon name: outline/check -->
+
+                                    <svg class="h-6 w-6 text-red-600"
+                                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                    </svg>
+
+                                </div>
+                                <div class="mt-3 text-center sm:mt-5">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Invalid token !</h3>
+                                    <div class="mt-2">
+                                        <p class="text-sm text-gray-500">The token provided is invalid, account not verified.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-5 sm:mt-6">
+                                <a href="/" class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:text-sm">
+                                    Go back
+                                </a>
+                            </div>
+                        </div>
+                    }
+                }
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@code {
+
+    [SupplyParameterFromQuery]
+    public string token { get; set; }
+
+    private bool Success;
+
+    private bool IsLoading = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+        await HandleConfirmation();
+        IsLoading = false;
+    }
+
+    private async Task HandleConfirmation()
+    {
+        await Task.Delay(2000);
+
+        Console.LogAsync(token);
+
+        if (token is null)
+        {
+            Success = false;
+            return;
+        }
+
+        var verified = await _userService.Verify(token);
+
+        Console.LogAsync(verified);
+
+        Success = verified.Success;
+
+    }
+
+    private void navigateOnSuccess()
+    {
+        NavManager.NavigateTo("/login");
+    }
+
+}

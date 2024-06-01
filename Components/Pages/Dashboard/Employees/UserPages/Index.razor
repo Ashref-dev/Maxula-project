@@ -1,0 +1,36 @@
+﻿@layout Layout.BlankLayout
+@page "/users"
+@using Microsoft.AspNetCore.Components.QuickGrid
+@inject Maxula_project.Data.DataContext DB
+@using Maxula_project.Models
+
+<PageTitle>Index</PageTitle>
+
+<h1 class="text-primary-600 text-4xl font-bold">Index</h1>
+
+<p class="my-4">
+    <a href="users/create" class="text-primary-600 underline">Create New</a>
+</p>
+
+<QuickGrid Class="table-auto w-full" Items="DB.Users">
+    <PropertyColumn Property="user => user.Email" />
+
+    <PropertyColumn Property="user => user.FirstName" />
+    <PropertyColumn Property="user => user.LastName" />
+    <PropertyColumn Property="user => user.IsAdmin" />
+    <PropertyColumn Property="user => user.Title" />
+
+    <PropertyColumn Property="user => user.JoinDate" />
+    <PropertyColumn Property="user => user.Address" />
+    <PropertyColumn Property="user => user.Country" />
+    <PropertyColumn Property="user => user.Phone" />
+    <PropertyColumn Property="user => user.ProductTeam" />
+    <PropertyColumn Property="user => user.Tags" />
+
+    <TemplateColumn Context="user">
+        <a href="@($"users/edit?userid={user.UserId}")" class="text-primary-600 underline">Edit</a> |
+        <a href="@($"users/details?userid={user.UserId}")" class="text-primary-600 underline">Details</a> |
+        <a href="@($"users/delete?userid={user.UserId}")" class="text-primary-600 underline">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+

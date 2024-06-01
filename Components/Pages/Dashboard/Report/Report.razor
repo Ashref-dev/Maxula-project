@@ -1,0 +1,484 @@
+﻿@using Maxula_project.Services.ActivityService
+@using Maxula_project.Services.UserService
+
+@inject NavigationManager NavigationManager
+@inject IActivityService _activityService
+@inject IUserService _userService
+@inject DateService DateService
+@inject IJSRuntime JS
+
+@* // Dashboard with sidebar layout usage  *@
+@layout Layout.AdminLayout
+
+@page "/admin/export/{page?}"
+
+<PageTitle>Maxula - Export PDF</PageTitle>
+
+<div class="mt-6">
+
+    <h2 class="text-lg max-w-6xl mx-auto mx-4 px-4 mb-4 sm:px-6 lg:px-8 leading-6 font-medium text-gray-900">
+        Export activity PDF @if (FilteredActivities is not null)
+        {
+            <span class="text-md font-light italic">- showing @FilteredActivities.Count() entries</span>
+        }
+    </h2>
+
+    <div class="flex justify-between max-w-6xl mb-10 mx-auto mx-4 px-4 sm:px-6 lg:px-8">
+
+
+        <div>
+
+            <div class="relative w-72">
+                <button type="button"
+                        @onclick='()=> toggleUserSelect()'
+                        class="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label">
+                    <span class="flex items-center">
+                        <img src="@selectedUserImage" alt="" class="flex-shrink-0 h-6 w-6 rounded-full">
+                        <span class="ml-3 block truncate"> @selectedUserName </span>
+                    </span>
+                    <span class="ml-3 absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <!-- Heroicon name: solid/selector -->
+                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </button>
+
+                <ul class="@userSelectToggle absolute z-10 mt-1 w-full bg-white shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm" tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3">
+                    @if (AllUsers != null)
+                    {
+
+                        @foreach (var userItem in AllUsers)
+                        {
+                            var user = userItem;
+
+
+                            <li class="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9" id="listbox-option-0"
+                                @onclick='() => {
+                                    toggleUserSelect();
+                                 q = user.FirstName + " " + user.LastName;
+                                 p = user.Picture;
+
+                                 selectedUserName = user.FirstName + " " + user.LastName;
+                                 selectedUserImage = user.Picture;
+
+                                                FilteredActivities = AllActivities
+                                                .Where(a => (a.User.FirstName +" "+a.User.LastName).ToLower().Contains(q.ToLower()))
+                                                .OrderBy(a => a.User.FirstName).ToList();
+
+                                                 sortToggle="hidden";
+                                                 userChanged = true;
+
+                                  }'
+                                role="option">
+                                <div class="flex items-center">
+                                    <img src="@user.Picture" alt="user picture" class="flex-shrink-0 h-6 w-6 rounded-full">
+                                    <!-- Selected: "font-semibold", Not Selected: "font-normal" -->
+                                    <span class="font-normal ml-3 block truncate"> @(user.FirstName + " " + user.LastName) </span>
+                                </div>
+
+                                @if (q == user.FirstName + " " + user.LastName)
+                                {
+                                    <span class="text-indigo-600 absolute inset-y-0 right-0 flex items-center pr-4">
+                                        <!-- Heroicon name: solid/check -->
+                                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                        </svg>
+                                    </span>
+                                }
+                            </li>
+                        }
+                    }
+                </ul>
+
+
+
+            </div>
+        </div>
+
+
+        <div class="relative inline-block">
+
+            <div class="flex items-center gap-4">
+
+
+                <SfDateRangePicker TValue="DateOnly?"
+                                   @bind-StartDate="@DateService.StartValue"
+                                   @bind-EndDate="@DateService.EndValue"
+                                   Min="@(new DateTime(2023,6,1))"
+                                   Max="@MaxDate"
+                                   MaxDays="31"
+                                   Placeholder="Choose a Range">
+                </SfDateRangePicker>
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke-width="1.5"
+                     stroke="currentColor"
+                     class="no-print w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+
+                <div class="no-print relative inline-flex">
+
+
+                    <button type="button"
+                            @onclick='() => {HandleNavigate($"admin/export/?q={q}&p={p}");DateService.HasSearched=true;}'
+                            style="z-index:900 !important"
+                            class="relative cursor-pointer h-full w-fit inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
+                        Filter
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                             class="w-4 h-4 ml-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
+                        </svg>
+                    </button>
+
+                    @if (DateService.HasSearched || q is not null || userChanged)
+                    {
+                        <div name="clear"
+                             @onclick='()=>{FilteredActivities = AllActivities!;
+                                 DateService.HasSearched = false;
+                                 sortLatest = true;
+                                 DateService.StartValue = new DateOnly(2023, 10, 01);
+                                 DateService.EndValue  = DateOnly.FromDateTime(DateTime.Now);
+                                 HandleNavigate("admin/export/");
+                             }'
+                             style="z-index:10 !important"
+                             class="absolute w-full px-6 py-1 h-10 -bottom-8 flex justify-center items-end rounded-b-lg cursor-pointer text-sm font-medium text-red-700 border border-red-300 bg-red-100 hover:bg-red-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
+                            <div class="flex gap-1 justify-center items-center">
+                                <p>Clear</p>
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     class="w-4 h-4"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                </svg>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <button class="no-print inline-flex gap-2 items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                        @onclick='async () => await Print()'>
+                    Export
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
+                    </svg>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <!-- Activity table -->
+    <div class="px-4 sm:px-6 lg:px-8 lg:mx-auto lg:max-w-6xl ">
+
+        <div class="mt-4 flex flex-col">
+            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-300">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                        Name
+                                    </th>
+                                    <th scope="col"
+                                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Desk ID
+                                    </th>
+
+                                    <th scope="col"
+                                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Date
+                                    </th>
+                                    <th scope="col"
+                                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Check in
+                                    </th>
+                                    <th scope="col"
+                                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Check out
+                                    </th>
+                                    <th scope="col"
+                                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Total Hours
+                                    </th>
+                                    <th scope="col" class="no-print relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                        <span class="sr-only">Edit</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 bg-white">
+
+                                @if (FilteredActivities != null)
+                                {
+                                    @foreach (var activity in FilteredActivities)
+                                    {
+                                        <tr>
+                                            <td class="whitespace-nowrap pl-4 text-sm sm:pl-6">
+                                                <div class="flex items-center">
+                                                    <div class="h-10 w-10 flex-shrink-0">
+                                                        <img class="h-10 w-10 rounded-full"
+                                                             src="@activity.User.Picture"
+                                                             alt="user icon">
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="font-medium text-gray-900">@activity.User.FirstName</div>
+                                                        <div class="text-gray-500">@activity.User.Email</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                <div class="text-gray-900 font-semibold">@activity.Sector</div>
+                                                <div class="text-gray-500">Desk @activity.DeskId</div>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                <span class="inline-flex rounded-full bg-green-100 px-2 text-l font-semibold leading-5 text-green-800">
+                                                    @activity.Date.ToString("dd/MM/yyyy")
+                                                </span>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                @activity.CheckIn
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                @(activity.CheckOut != null ? activity.CheckOut : "Not yet")
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                @if (activity.CheckOut != null)
+                                                {
+                                                    DateTime startTime = DateTime.Parse(activity.CheckIn.ToString());
+                                                    DateTime endTime = DateTime.Parse(activity.CheckOut.ToString());
+
+                                                    TimeSpan elapsedTime = endTime.Subtract(startTime);
+
+                                                    if (endTime.Date > startTime.Date)
+                                                    {
+                                                        elapsedTime += new TimeSpan(24, 0, 0);
+                                                    }
+
+                                                    double totalHours = elapsedTime.TotalHours - 1;
+
+                                                    <p>@totalHours.ToString("0.00") hours</p>
+                                                }
+                                                else
+                                                {
+                                                    <p>N/A</p>
+                                                }
+                                            </td>
+                                            <td class="no-print relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                                <a href="" class="text-indigo-600 hover:text-indigo-900">
+                                                    Entry @activity.ActivityId »
+                                                    <span class="sr-only">, @activity.User.FirstName</span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <p class="text-3xl">Loading...</p>
+                                }
+
+
+                                <!-- More people... -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @* end of activity table *@
+
+
+    <!-- Pagination -->
+    <nav aria-label="Pagination" class="hidden max-w-6xl mx-auto px-4 mt-4 flex justify-between text-sm font-medium text-gray-700 sm:px-6 lg:px-8">
+        <div class="min-w-0 flex-1">
+            @if (currentPage != 1)
+            {
+                <button class="inline-flex items-center px-4 h-10 border border-gray-300 rounded-md bg-white hover:bg-gray-100 focus:outline-none focus:border-primary-600 focus:ring-2 focus:ring-offset-1 focus:ring-offset-primary-600 focus:ring-primary-600 focus:ring-opacity-25"
+                        @onclick='(() => HandleNavigate($"admin/export/{currentPage - 1}?q={q??""}"))'
+                        value="previous">
+                    Previous
+                </button>
+            }
+        </div>
+
+        <div class="hidden space-x-2 sm:flex">
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                var page = i;
+
+                <button class="@(page == currentPage ? "ring-1 ring-primary-600":"") inline-flex items-center px-4 h-10 border border-gray-300 rounded-md bg-white hover:bg-gray-100 focus:outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-1 focus:ring-offset-primary-600 focus:ring-primary-600 focus:ring-opacity-25"
+                        @onclick='(() => HandleNavigate($"admin/export/{page}?q={q??""}"))'
+                        value="@(page)">
+                    @(page)
+                </button>
+            }
+        </div>
+
+        <div class="min-w-0 flex-1 flex justify-end">
+            @if (currentPage != totalPages)
+            {
+                <button class="inline-flex items-center px-4 h-10 border border-gray-300 rounded-md bg-white hover:bg-gray-100 focus:outline-none focus:border-primary-600 focus:ring-2 focus:ring-offset-1 focus:ring-offset-primary-600 focus:ring-primary-600 focus:ring-opacity-25"
+                        @onclick='(() => HandleNavigate($"admin/export/{currentPage + 1}?q={q??""}"))'
+                        value="next">
+                    Next
+                </button>
+            }
+        </div>
+    </nav>
+
+</div>
+
+@code {
+    List<GetUserResponseDto> AllUsers = null!;
+
+    List<GetUserResponseDto> AllUsersFull = null!;
+
+    List<GetActivityResponseDto> AllActivities = null!;
+
+    List<GetActivityResponseDto> FilteredActivities = null!;
+
+
+    private string sortToggle = "hidden";
+
+    private bool sortLatest = true;
+
+    [Parameter]
+    public string? page { get; set; }
+
+    private int totalPages;
+
+    private int currentPage;
+
+    private int pageSize = 100;
+
+    // search functionality
+
+    [SupplyParameterFromQuery]
+    public string q { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string p { get; set; }
+
+
+    // user selection feature
+
+    public string selectedUserName;
+
+    public string selectedUserImage;
+
+    public string userSelectToggle = "hidden";
+
+    public bool userChanged = false;
+
+    public void toggleUserSelect()
+    {
+        userSelectToggle = userSelectToggle == "hidden" ? "" : "hidden";
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        page ??= "1";
+
+        // getting the current page from path
+        currentPage = int.Parse(page);
+
+        DateOnly start = DateService.StartValue.Value;
+
+        DateOnly end = DateService.EndValue.Value;
+
+
+
+        if (q is null || q == "")
+        {
+
+            selectedUserName = "None";
+            selectedUserImage = "https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg";
+
+            var response = await _activityService.GetAllActivities("", start, end, currentPage, pageSize);
+
+            if (response.Data != null)
+            {
+                FilteredActivities = response.Data == null ? new List<GetActivityResponseDto>() : response.Data;
+                AllActivities = FilteredActivities;
+            }
+        }
+        else
+        {
+
+            var response = await _activityService.GetAllActivities("", start, end, currentPage, pageSize);
+
+            if (response.Data != null)
+            {
+                FilteredActivities = response.Data ?? new List<GetActivityResponseDto>();
+                AllActivities = FilteredActivities;
+            }
+
+            selectedUserName = q;
+            selectedUserImage = p;
+
+
+            FilteredActivities = AllActivities
+               .Where(a => (a.User.FirstName + " " + a.User.LastName).ToLower().Contains(selectedUserName.ToLower()))
+               .OrderBy(a => a.User.FirstName).ToList();
+
+
+            userChanged = true;
+
+
+        }
+
+
+        // Calculate the total number of pages based on the total number of activities and the page size
+        var total = await _activityService.GetAllActivities(q ?? "", start, end, 1, 88);
+
+
+        totalPages = total.Data != null ? (int)Math.Ceiling((double)total.Data.Count / pageSize) : 1;
+
+
+        // getting all users
+        var userResponse = await _userService.GetAllUsers();
+
+        if (userResponse.Success)
+        {
+            AllUsers = userResponse.Data!;
+            AllUsersFull = userResponse.Data!;
+        }
+
+    }
+
+    private void HandleNavigate(string route)
+    {
+        NavigationManager.NavigateTo(route, true);
+    }
+
+    // date range picker gets values from the date service
+
+
+    DateTime MaxDate { get; set; } = DateTime.Now;
+
+
+    // printing
+
+    private async Task Print()
+    {
+        await JS.InvokeVoidAsync("printInvoke");
+    }
+
+
+}

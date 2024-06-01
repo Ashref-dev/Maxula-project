@@ -1,0 +1,150 @@
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+
+@inject IJSRuntime JS
+@inject ProtectedLocalStorage LocalStorage
+@inject NavigationManager NavManager
+
+<header class="sticky inset-x-0 top-0 z-50 transition-all">
+    <nav class="animate-fade-down animate-delay-[1.6s] absolute w-full flex items-center justify-between z-100 p-6 sm:px-8"
+         id="header" aria-label="Global">
+        <div class="flex lg:flex-1">
+            <a href="/">
+                <span class="sr-only">Maxula Group</span>
+                <img class="h-7 w-auto" src="assets/images/logo_full.png" alt="Maxula Group logo">
+            </a>
+        </div>
+        <div class="flex sm:hidden">
+            <button type="button" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+                    @onclick="toggleMenu">
+                <span class="sr-only">Open main menu</span>
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                     aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+            </button>
+        </div>
+        <div class="hidden sm:flex sm:gap-x-12">
+            <NavLink href="/" class="text-sm font-semibold leading-6 text-gray-900">Home</NavLink>
+            <NavLink href="#about" class="text-sm font-semibold leading-6 text-gray-900">About</NavLink>
+            <NavLink href="/legal" class="text-sm font-semibold leading-6 text-gray-900">Legal</NavLink>
+            <NavLink href="/contact" class="text-sm font-semibold leading-6 text-gray-900">Contact</NavLink>
+        </div>
+        @*  user control center *@
+
+        @if (currentUser != null)
+        {
+            <div class="hidden sm:flex sm:justify-end lg:flex-1 lg:items-center">
+                <ControlCenter currentUser="@currentUser" />
+            </div>
+        }
+        else
+        {
+            <div class="hidden sm:flex sm:justify-end lg:flex-1 lg:items-center">
+                <div class="flex flex-row items-center gap-4">
+                    <ThemeToggle />
+                    <a href="/register">
+                        <button class="inline-flex gap-1 w-fit text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                            Register
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                 stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                            </svg>
+                        </button>
+                    </a>
+                    <a href="/login" class="inline-flex gap-1 items-center text-sm font-semibold leading-6 text-gray-900">
+                        Log in
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                             stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        }
+
+        @* End user control center *@
+
+    </nav>
+
+
+    <!-- ! Mobile menu, show/hide based on menu open state. -->
+    <div class="sm:hidden @menuClass" role="dialog" aria-modal="true">
+        <!-- Background backdrop, show/hide based on slide-over state. -->
+        <div class="fixed inset-0 z-50"></div>
+        <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+            <div class="flex items-center justify-between">
+                <a href="#" class="-m-1.5 p-1.5">
+                    <span class="sr-only">Maxula Group</span>
+                    <img class="h-8 w-auto" src="assets/images/logo.png" alt="Maxula Group Logo">
+                </a>
+                <button type="button" class="-m-2.5 rounded-md p-2.5 text-gray-700" @onclick="toggleMenu">
+                    <span class="sr-only">Close menu</span>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                         aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-6 flow-root">
+                <div class="-my-6 divide-y divide-gray-500/10">
+                    <div class="space-y-2 py-6">
+                        <NavLink href="/"
+                                 class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">Home</NavLink>
+                        <NavLink href="#about"
+                                 class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">About</NavLink>
+                        <NavLink href="/legal"
+                                 class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">Legal</NavLink>
+                        <NavLinka href="/contact"
+                                  class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">Contact</NavLinka>
+                    </div>
+                    <div class="py-6" @onclick="toggleMenu">
+
+                        @if (currentUser != null)
+                        {
+                            <ControlCenter currentUser="@currentUser" />
+                        }
+                        else
+                        {
+                            <NavLink href="/login"
+                                     class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">
+                                Log in
+                            </NavLink>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+@code {
+
+    // getting the current user
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await LocalStorage.GetAsync<User>("CURRENT_USER");
+        currentUser = result.Success ? result.Value! : null;
+        await LogAsync(currentUser!);
+    }
+    private User? currentUser;
+
+
+    // Custom console logger for client side
+    public async Task LogAsync(object message)
+    {
+        await JS.InvokeVoidAsync("console.log", message);
+    }
+
+
+    // Sidebar toggle code
+
+    [Parameter] public string menuClass { get; set; } = " hidden";
+
+    private void toggleMenu()
+    {
+        menuClass = menuClass == " hidden" ? "" : " hidden";
+    }
+}

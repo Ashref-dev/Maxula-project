@@ -1,0 +1,99 @@
+﻿@page "/users/create"
+@inject Maxula_project.Data.DataContext DB
+@using Maxula_project.Models
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h4>User</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="User" OnValidSubmit="AddUser" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label> 
+                <InputText id="email" @bind-Value="User.Email" class="form-control" /> 
+                <ValidationMessage For="() => User.Email" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="password" class="form-label">Password:</label> 
+                <InputText id="password" @bind-Value="User.Password" class="form-control" /> 
+                <ValidationMessage For="() => User.Password" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="firstname" class="form-label">FirstName:</label> 
+                <InputText id="firstname" @bind-Value="User.FirstName" class="form-control" /> 
+                <ValidationMessage For="() => User.FirstName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="lastname" class="form-label">LastName:</label> 
+                <InputText id="lastname" @bind-Value="User.LastName" class="form-control" /> 
+                <ValidationMessage For="() => User.LastName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="isadmin" class="form-label">IsAdmin:</label> 
+                <InputCheckbox id="isadmin" @bind-Value="User.IsAdmin" class="form-check-input" /> 
+                <ValidationMessage For="() => User.IsAdmin" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="title" class="form-label">Title:</label> 
+                <InputText id="title" @bind-Value="User.Title" class="form-control" /> 
+                <ValidationMessage For="() => User.Title" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="picture" class="form-label">Picture:</label> 
+                <InputText id="picture" @bind-Value="User.Picture" class="form-control" /> 
+                <ValidationMessage For="() => User.Picture" class="text-danger" /> 
+            </div>        
+                  
+            <div class="mb-3">
+                <label for="address" class="form-label">Address:</label> 
+                <InputText id="address" @bind-Value="User.Address" class="form-control" /> 
+                <ValidationMessage For="() => User.Address" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="country" class="form-label">Country:</label> 
+                <InputText id="country" @bind-Value="User.Country" class="form-control" /> 
+                <ValidationMessage For="() => User.Country" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="phone" class="form-label">Phone:</label> 
+                <InputText id="phone" @bind-Value="User.Phone" class="form-control" /> 
+                <ValidationMessage For="() => User.Phone" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="productteam" class="form-label">ProductTeam:</label> 
+                <InputText id="productteam" @bind-Value="User.ProductTeam" class="form-control" /> 
+                <ValidationMessage For="() => User.ProductTeam" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="tags" class="form-label">Tags:</label> 
+                <InputText id="tags" @bind-Value="User.Tags" class="form-control" /> 
+                <ValidationMessage For="() => User.Tags" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/users">Back to List</a>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public User User { get; set; } = new();
+
+    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+    public async Task AddUser()
+    {
+        DB.Users.Add(User);
+        await DB.SaveChangesAsync();
+        NavigationManager.NavigateTo("/users");
+    }
+}

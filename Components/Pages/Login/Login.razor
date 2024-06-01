@@ -1,0 +1,184 @@
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Maxula_project.Services.UserService
+
+@page "/login"
+@inject IUserService _userService
+@inject IJSRuntime JS
+@inject NavigationManager NavManager
+@inject ProtectedLocalStorage LocalStorage
+
+<PageTitle>Maxula Group - Login</PageTitle>
+
+<section class="bg-gray-50 dark:bg-gray-900 ">
+    <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto h-screen lg:py-0">
+        <div class="bg-cover bg-center w-3/4 h-3/4 absolute flex flex-col items-center justify-center rounded-lg"
+             style="background-image: url('assets/images/login.jpg')">
+            <div class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+                <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+                    <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+                        Sign in to your account
+                    </h1>
+                    <EditForm Enhance Model="@user" OnValidSubmit="HandleValidLogin" class="space-y-4 md:space-y-6">
+                        <DataAnnotationsValidator />
+
+                        <!-- Email field -->
+                        <div>
+                            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Your
+                                email
+                            </label>
+                            <InputText name="email" id="email" @bind-Value="user.Email"
+                                       class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 placeholder-gray-300 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                       placeholder="name@company.com" />
+                            <ValidationMessage For="@(() => user.Email)"
+                                               class="font-light text-red-500 dark:text-red-300" />
+                        </div>
+
+                        <!-- Password field -->
+                        <div>
+                            <label for="password"
+                                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
+                            <InputText name="password" id="password" @bind-Value="user.Password"
+                                       class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 placeholder-gray-300 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                       placeholder="••••••••" />
+                            <ValidationMessage For="@(() => user.Password)"
+                                               class="font-light text-red-500 dark:text-red-300" />
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                    <input type="checkbox" id="terms"
+                                           class="relative w-[3.25rem] h-7 p-px bg-gray-100 border-transparent text-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:ring-red-600 disabled:opacity-50 disabled:pointer-events-none checked:bg-none checked:text-primary-600 checked:border-primary-600 focus:checked:border-primary-600 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-primary-500 dark:checked:border-primary-500 dark:focus:ring-offset-gray-600 before:inline-block before:size-6 before:bg-white checked:before:bg-primary-200 before:translate-x-0 checked:before:translate-x-full before:rounded-full before:shadow before:transform before:ring-0 before:transition before:ease-in-out before:duration-200 dark:before:bg-gray-400 dark:checked:before:bg-primary-200" />
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="remember" class="text-gray-500 dark:text-gray-300">Remember me</label>
+                                </div>
+                            </div>
+                            <a href=""
+                               class="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">
+                                Forgot
+                                password?
+                            </a>
+                        </div>
+                        <!-- Submit button -->
+                        <button type="submit"
+                                class="grid place-items-center w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                disabled="@isLoading">
+
+                            @if (isLoading)
+                            {
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                                     fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="white" stroke-width="4">
+                                    </circle>
+                                    <path class="opacity-75" fill="white"
+                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                            }
+                            else
+                            {
+                                <p>Sign in</p>
+                            }
+                        </button>
+                        <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+                            Don’t have an account yet?
+                            <a href="/register"
+                               class="font-medium text-primary-600 hover:underline dark:text-primary-500">
+                                Sign up
+                            </a>
+                        </p>
+                    </EditForm>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<CustomDialog Title="Email or password incorrect" BodyText="Please check your email and password then try again."
+              IsVisible="@isErrorVisible">
+    <button type="button"
+            class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
+            @onclick=" () => NavManager.NavigateTo(NavManager.Uri, forceLoad: true) ">
+        Close
+    </button>
+</CustomDialog>
+
+<SuccessDialog Title="Logged in successfully." BodyText="Your have been logged in successfully, enjoy."
+               IsVisible="@isSuccessVisible">
+    <div class="mt-5 sm:mt-6">
+        <button @onclick="navigateOnSuccess" type="button"
+                class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-400 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
+            Proceed
+        </button>
+    </div>
+</SuccessDialog>
+
+@code {
+    public User? currentUser;
+
+    // Modal code
+
+    private bool isErrorVisible = false;
+
+    private void OpenError()
+    {
+        isErrorVisible = true;
+    }
+
+    private bool isSuccessVisible = false;
+
+    private void OpenSuccess()
+    {
+        isSuccessVisible = true;
+    }
+
+    // Custom console logger for client side
+
+    public async Task LogAsync(object message)
+    {
+        await JS.InvokeVoidAsync("console.log", message);
+    }
+
+    // Form validation and submit code
+
+    private bool isLoading = false;
+
+    private LoginForm user = new();
+
+    private async Task HandleValidLogin()
+    {
+        isLoading = true;
+
+        await Task.Delay(1000);
+
+        var loginAttempt = await _userService.Login(user.Email, user.Password);
+
+        await LogAsync(loginAttempt);
+
+        if (!loginAttempt.Success)
+        {
+            OpenError();
+            isLoading = false;
+            return;
+        }
+
+        // Add user to local storage
+        var userData = loginAttempt.Data;
+
+        await LocalStorage.SetAsync("CURRENT_USER", userData!);
+
+        // Open modal to notify of successful login
+        OpenSuccess();
+
+        isLoading = false;
+
+    }
+
+    private void navigateOnSuccess()
+    {
+        NavManager.NavigateTo("/", forceLoad: true);
+    }
+}
