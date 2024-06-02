@@ -1,0 +1,36 @@
+.marquee {
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+  gap: 3.5rem;
+}
+.marquee-content {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-around;
+  min-width: 100%;
+  gap: 3.5rem;
+  height: 2.2em;
+}
+@media only screen and (min-width: 1440px) {
+  .marquee-content {
+    height: 2.2em !important;
+  }
+}
+
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - 1rem));
+  }
+}
+.scroll {
+  animation: scroll 40s linear infinite;
+}
+.rev {
+  animation-direction: reverse;
+}
+
