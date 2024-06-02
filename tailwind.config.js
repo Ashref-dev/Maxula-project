@@ -5,7 +5,6 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                
                 'primary': {
                     '50': '#f0f5fe',
                     '100': '#dee8fb',
@@ -19,11 +18,20 @@ module.exports = {
                     '900': '#273981',
                     '950': '#1c254f',
                 },
+            },
 
-
+            animation: {
+                'loop-scroll': 'loop-scroll 50s linear infinite',
+            },
+            keyframes: {
+                'loop-scroll': {
+                    from: { transform: 'translateX(0)' },
+                    to: { transform: 'translateX(-100%)' },
+                }
             },
         },
     },
+
     plugins: [
         require('@tailwindcss/forms'),
         require('@tailwindcss/aspect-ratio'),
