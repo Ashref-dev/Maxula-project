@@ -31,3 +31,15 @@
         opacity: 0;
     }
 }
+
+/* Default state: hidden */
+.hide-it {
+    display: none !important;
+}
+
+/* Media query for screens larger than 1024px */
+@media screen and (min-width: 1024px) {
+    .hide-it {
+        display: block !important;
+    }
+}
