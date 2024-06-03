@@ -1,9 +1,9 @@
 ﻿@using Maxula_project.Services.ActivityService
-@using Maxula_project.Components.Layout
-@using System.Drawing;
 @using QRCoder;
-@using System.Drawing.Imaging;
 @using BlazorDownloadFile
+@using SixLabors.ImageSharp
+@using SixLabors.ImageSharp.PixelFormats
+@using SixLabors.ImageSharp.Processing
 
 @layout Layout.AdminLayout
 @page "/admin/codes"
@@ -233,14 +233,17 @@
     {
         if (!string.IsNullOrEmpty(QRCodeText))
         {
-            using MemoryStream ms = new();
             QRCodeGenerator qrCodeGenerate = new();
             QRCodeData qrCodeData = qrCodeGenerate.CreateQrCode(QRCodeText, QRCodeGenerator.ECCLevel.Q);
-            QRCode qrCode = new(qrCodeData);
-            using Bitmap qrBitMap = qrCode.GetGraphic(20, Color.Black, Color.White, (Bitmap)Bitmap.FromFile("wwwroot/assets/images/qr_badge.png"));
-            qrBitMap.Save(ms, ImageFormat.Png);
+            PngByteQRCode qrCode = new PngByteQRCode(qrCodeData);
+            // using var icon = Image.Load("wwwroot/assets/images/qr_badge.png");
+            byte[] qrCodeImage = qrCode.GetGraphic(20);
+
+            using var image = Image.Load(qrCodeImage);
+            using var ms = new MemoryStream();
+            image.SaveAsPng(ms);
             string base64 = Convert.ToBase64String(ms.ToArray());
-            return string.Format("data:image/png;base64,{0}", base64);
+            return $"data:image/png;base64,{base64}";
         }
         else
         {
@@ -250,14 +253,28 @@
 
     public async Task DownloadQRCode(string qrCodeText)
     {
-        var qrCodeGenerate = new QRCodeGenerator();
-        var qrCodeData = qrCodeGenerate.CreateQrCode(qrCodeText, QRCodeGenerator.ECCLevel.Q);
-        var qrCode = new QRCode(qrCodeData);
-        using var bitmap = qrCode.GetGraphic(20, Color.Black, Color.White, (Bitmap)Bitmap.FromFile("wwwroot/assets/images/qr_badge.png"));
-        using var stream = new MemoryStream();
-        bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-        var bytes = stream.ToArray();
-        await BlazorDownloadFileService.DownloadFile("QRCode.png", bytes, "image/png");
+        if (!string.IsNullOrEmpty(qrCodeText))
+        {
+            // Generate the QR code
+            QRCodeGenerator qrCodeGenerate = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrCodeGenerate.CreateQrCode(qrCodeText, QRCodeGenerator.ECCLevel.Q);
+            PngByteQRCode qrCode = new PngByteQRCode(qrCodeData);
+            byte[] qrCodeImage = qrCode.GetGraphic(20);
+
+            // Load the QR code image
+            using var qrCodeImageSharp = Image.Load<Rgba32>(qrCodeImage);
+
+            // using var icon = Image.Load<Rgba32>("wwwroot/assets/images/qr_badge.png");
+
+
+            // Convert the final image to a byte array
+            using var ms = new MemoryStream();
+            qrCodeImageSharp.SaveAsPng(ms);
+            byte[] bytes = ms.ToArray();
+
+            // Download the QR code image
+            await BlazorDownloadFileService.DownloadFile("QRCode.png", bytes, "image/png");
+        }
     }
 
 
