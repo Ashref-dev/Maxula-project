@@ -267,7 +267,7 @@
             Body = htmlBody
         };
 
-        await _emailService.SendEmailAsync(mail); // Make sure this method is async as well
+         _emailService.SendEmail(mail);
     }
     catch (Exception ex)
     {
