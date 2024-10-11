@@ -200,72 +200,84 @@
     private RegisterForm user = new();
 
     private async Task HandleValidSubmit()
+{
+    isLoading = true;
+
+    await Task.Delay(1000);
+
+    var userFound = await _userService.GetUserByString(user.Email);
+
+    if (userFound.Success)
     {
-        isLoading = true;
-
-        await Task.Delay(1000);
-
-        var userFound = await _userService.GetUserByString(user.Email);
-
-        if (userFound.Success)
+        OpenAlert();
+        isLoading = false;
+        return;
+    }
+    else
+    {
+        AddUserRequestDto newUser = new()
         {
-            OpenAlert();
+            Email = user.Email,
+            Password = user.Password,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+        };
+
+        var created = await _userService.AddUser(newUser);
+
+        await Console.LogAsync(created);
+
+        if (created.Success)
+        {
+            OpenSuccess();
+
+            // Send mail to user's email for confirmation logic
+            await SendConfirmationMailAsync(created.Data.Email, created.Data.VerificationToken);
+
             isLoading = false;
             return;
         }
         else
         {
-            AddUserRequestDto newUser = new()
-                {
-                    Email = user.Email,
-                    Password = user.Password,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                };
-
-            var created = await _userService.AddUser(newUser);
-
-            await Console.LogAsync(created);
-
-            if (created.Success)
-            {
-                OpenSuccess();
-
-                //Send mail to user's email for confirmation logic
-                SendConfirmationMail(created.Data.Email, created.Data.VerificationToken);
-
-                isLoading = false;
-                return;
-            }
-            else
-            {
-                OpenError();
-                isLoading = false;
-                return;
-            }
-
-        } 
-
+            OpenError();
+            isLoading = false;
+            return;
+        }
     }
+}
+
 
     private void navigateOnSuccess()
     {
         NavManager.NavigateTo("/login");
     }
 
-    private void SendConfirmationMail(string email, string token)
+    private async Task SendConfirmationMailAsync(string email, string token)
+{
+    try
     {
         string path = Path.Combine(WebhostEnvironment.WebRootPath, "MailPage/mail.html");
-        string htmlBody = System.IO.File.ReadAllText(path);
+        string htmlBody = await System.IO.File.ReadAllTextAsync(path); // Use async for reading the file
         htmlBody = htmlBody.Replace("{token}", token);
 
         EmailModel mail = new()
-            {
-                To = email,
-                Subject = "Maxula HR - Confirm account",
-                Body = htmlBody
-            };
+        {
+            To = email,
+            Subject = "Maxula HR - Confirm account",
+            Body = htmlBody
+        };
 
-        _emailService.SendEmail(mail);
+        await _emailService.SendEmailAsync(mail); // Make sure this method is async as well
     }
+    catch (Exception ex)
+    {
+        // Log the error to the console
+        await Console.LogAsync($"Error sending confirmation email: {ex.Message}");
+        
+        // Display error message and reset loading state
+        OpenError();
+        isLoading = false;
+    }
+}
+
 }
