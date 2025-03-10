@@ -176,13 +176,6 @@
         isSuccessVisible = true;
     }
 
-    // Custom console logger for client side
-
-    public async Task LogAsync(object message)
-    {
-        await JS.InvokeVoidAsync("console.log", message);
-    }
-
 
     // password visibility toggle
     string passwordFieldType = "password";
@@ -224,8 +217,6 @@
         };
 
         var created = await _userService.AddUser(newUser);
-
-        await Console.LogAsync(created);
 
         if (created.Success)
         {

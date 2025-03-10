@@ -135,13 +135,6 @@
         isSuccessVisible = true;
     }
 
-    // Custom console logger for client side
-
-    public async Task LogAsync(object message)
-    {
-        await JS.InvokeVoidAsync("console.log", message);
-    }
-
     // Form validation and submit code
 
     private bool isLoading = false;
@@ -155,8 +148,6 @@
         await Task.Delay(1000);
 
         var loginAttempt = await _userService.Login(user.Email, user.Password);
-
-        await LogAsync(loginAttempt);
 
         if (!loginAttempt.Success)
         {

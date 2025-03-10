@@ -351,8 +351,6 @@
         {
             var response = await _activityService.GetAllActivities(q, start, end, currentPage, pageSize);
 
-            await Console.LogAsync(response);
-
             if (response.Data != null)
             {
                 FilteredActivities = response.Data == null ? new List<GetActivityResponseDto>() : response.Data;

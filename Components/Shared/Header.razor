@@ -127,7 +127,6 @@
     {
         var result = await LocalStorage.GetAsync<User>("CURRENT_USER");
         currentUser = result.Success ? result.Value! : null;
-        await LogAsync(currentUser!);
     }
     private User? currentUser;
 
